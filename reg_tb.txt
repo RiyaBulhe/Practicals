@@ -1,0 +1,90 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.STD_LOGIC_ARITH.ALL;
+USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+ENTITY reg_tb IS
+    -- Testbench does not have any ports
+END reg_tb;
+
+ARCHITECTURE behavior OF reg_tb IS
+
+    -- Component Declaration of the Unit Under Test (UUT)
+    COMPONENT reg
+        PORT (
+            din : IN  STD_LOGIC_VECTOR(3 DOWNTO 0);
+            dout : INOUT  STD_LOGIC_VECTOR(3 DOWNTO 0);
+            mode1 : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
+            clk : IN  STD_LOGIC;
+            rst : IN  STD_LOGIC
+        );
+    END COMPONENT;
+
+    -- Signal Declarations for inputs and outputs
+    SIGNAL din_tb : STD_LOGIC_VECTOR(3 DOWNTO 0) := "0000";
+    SIGNAL dout_tb : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    SIGNAL mode1_tb : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
+    SIGNAL clk_tb : STD_LOGIC := '0';
+    SIGNAL rst_tb : STD_LOGIC := '0';
+
+    -- Clock Period
+    CONSTANT clk_period : TIME := 10 ns;
+
+BEGIN
+
+    -- Instantiate the Unit Under Test (UUT)
+    uut: reg
+        PORT MAP (
+            din => din_tb,
+            dout => dout_tb,
+            mode1 => mode1_tb,
+            clk => clk_tb,
+            rst => rst_tb
+        );
+
+    -- Clock Generation Process
+    CLK_GEN: PROCESS
+    BEGIN
+        -- Toggle the clock every clk_period
+        clk_tb <= NOT clk_tb;
+        WAIT FOR clk_period / 2;
+    END PROCESS;
+
+    -- Stimulus Process
+    STIMULUS: PROCESS
+    BEGIN
+        -- Reset the device
+        rst_tb <= '1';  -- Apply reset
+        WAIT FOR 20 ns;
+        rst_tb <= '0';  -- Remove reset
+        WAIT FOR 20 ns;
+
+        -- Test Mode 00 (SISO - Right Shift)
+        mode1_tb <= "00";
+        din_tb <= "1010";  -- Set input data
+        WAIT FOR 20 ns;
+        din_tb <= "1100";  -- Set new input data
+        WAIT FOR 20 ns;
+
+        -- Test Mode 01 (PIPO - Parallel In, Parallel Out)
+        mode1_tb <= "01";
+        din_tb <= "1111";  -- Set input data
+        WAIT FOR 20 ns;
+
+        -- Test Mode 10 (SIPO - Serial In, Parallel Out)
+        mode1_tb <= "10";
+        din_tb <= "0110";  -- Set input data
+        WAIT FOR 20 ns;
+
+        -- Test Mode 11 (SISO - Left Shift)
+        mode1_tb <= "11";
+        din_tb <= "1001";  -- Set input data
+        WAIT FOR 20 ns;
+
+        -- End simulation
+        WAIT FOR 40 ns;
+        ASSERT FALSE REPORT "Testbench finished" SEVERITY note;
+        WAIT;
+    END PROCESS;
+
+END behavior;

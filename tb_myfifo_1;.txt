@@ -1,0 +1,68 @@
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.std_logic_unsigned.ALL;
+
+ENTITY tb_myfifo_1 IS
+END tb_myfifo_1;
+
+ARCHITECTURE behavior OF tb_myfifo_1 IS
+    -- Signals to connect to the FIFO
+    SIGNAL datain : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL en : STD_LOGIC;
+    SIGNAL clk : STD_LOGIC;
+    SIGNAL rst : STD_LOGIC;
+    SIGNAL W : STD_LOGIC;
+    SIGNAL dataout : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL red : STD_LOGIC;
+
+    COMPONENT myfifo_1
+        PORT (
+            datain : IN  STD_LOGIC_VECTOR (7 DOWNTO 0);
+            en, clk, rst : IN  STD_LOGIC;
+            W : IN  STD_LOGIC;
+            DATAOUT : OUT  STD_LOGIC_VECTOR (7 DOWNTO 0);
+            RED : OUT  STD_LOGIC
+        );
+    END COMPONENT;
+
+BEGIN
+    -- Instantiate the FIFO
+    uut: myfifo_1 PORT MAP (datain, en, clk, rst, W, dataout, red);
+
+    -- Clock generation
+    clk <= NOT clk AFTER 10 ns;
+
+    -- Stimulus process
+    stim_proc: PROCESS
+    BEGIN
+        -- Initialize signals
+        rst <= '1'; en <= '0'; W <= '0'; datain <= "00000000";
+        WAIT FOR 20 ns;
+
+        rst <= '0'; 
+        WAIT FOR 10 ns;
+
+        -- Write to FIFO
+        en <= '1'; W <= '1'; datain <= "10101010";  -- Data to be written to FIFO
+        WAIT FOR 10 ns;
+        W <= '0';
+
+        -- Write more data
+        WAIT FOR 10 ns;
+        W <= '1'; datain <= "11110000";
+        WAIT FOR 10 ns;
+        W <= '0';
+
+        -- Read from FIFO
+        WAIT FOR 20 ns;
+        en <= '1'; W <= '0';  -- Read from FIFO
+        WAIT FOR 20 ns;
+        -- Simulate read more data
+        en <= '1'; W <= '0'; 
+        WAIT FOR 20 ns;
+
+        -- End the simulation
+        ASSERT FALSE REPORT "End of simulation" SEVERITY FAILURE;
+        WAIT;
+    END PROCESS;
+END behavior;

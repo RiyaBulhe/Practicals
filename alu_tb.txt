@@ -1,0 +1,132 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity ALU4BIT_TB is
+-- Testbench does not have ports
+end ALU4BIT_TB;
+
+architecture behavior of ALU4BIT_TB is
+    -- Component declaration for the ALU4BIT
+    component ALU4BIT
+        Port ( 
+            A : in  STD_LOGIC_VECTOR (3 downto 0);
+            B : in  STD_LOGIC_VECTOR (3 downto 0);
+            MODE1 : in  STD_LOGIC_VECTOR (2 downto 0);
+            CIN : in  STD_LOGIC;
+            RESULT : out  STD_LOGIC_VECTOR (3 downto 0);
+            COUT : out  STD_LOGIC;
+            FLAG : out  STD_LOGIC_VECTOR (3 downto 0)
+        );
+    end component;
+
+    -- Signal declarations for inputs and outputs
+    signal A : STD_LOGIC_VECTOR (3 downto 0) := "0000";
+    signal B : STD_LOGIC_VECTOR (3 downto 0) := "0000";
+    signal MODE1 : STD_LOGIC_VECTOR (2 downto 0) := "000";
+    signal CIN : STD_LOGIC := '0';
+    signal RESULT : STD_LOGIC_VECTOR (3 downto 0);
+    signal COUT : STD_LOGIC;
+    signal FLAG : STD_LOGIC_VECTOR (3 downto 0);
+
+begin
+    -- Instantiate the ALU4BIT component
+    uut: ALU4BIT
+        Port map (
+            A => A,
+            B => B,
+            MODE1 => MODE1,
+            CIN => CIN,
+            RESULT => RESULT,
+            COUT => COUT,
+            FLAG => FLAG
+        );
+
+    -- Stimulus process
+    stim_proc: process
+    begin
+        -- Test 1: Addition
+        A <= "0001";  -- 1
+        B <= "0010";  -- 2
+        MODE1 <= "000";  -- ADDITION
+        CIN <= '0';  -- No carry-in
+        wait for 10 ns;
+        assert (RESULT = "0011") report "Addition Test Failed" severity error;
+        assert (COUT = '0') report "Carry Out Test Failed" severity error;
+        assert (FLAG = "0000") report "Flag Test Failed" severity error;
+
+        -- Test 2: Subtraction
+        A <= "0100";  -- 4
+        B <= "0011";  -- 3
+        MODE1 <= "001";  -- SUBTRACTION
+        CIN <= '0';  -- No carry-in
+        wait for 10 ns;
+        assert (RESULT = "0001") report "Subtraction Test Failed" severity error;
+        assert (COUT = '0') report "Carry Out Test Failed" severity error;
+        assert (FLAG = "0000") report "Flag Test Failed" severity error;
+
+        -- Test 3: AND operation
+        A <= "1010";  -- 10
+        B <= "1100";  -- 12
+        MODE1 <= "010";  -- AND
+        CIN <= '0';  -- No carry-in
+        wait for 10 ns;
+        assert (RESULT = "1000") report "AND Test Failed" severity error;
+        assert (COUT = '0') report "Carry Out Test Failed" severity error;
+        assert (FLAG = "0000") report "Flag Test Failed" severity error;
+
+        -- Test 4: OR operation
+        A <= "1010";  -- 10
+        B <= "1100";  -- 12
+        MODE1 <= "110";  -- OR
+        CIN <= '0';  -- No carry-in
+        wait for 10 ns;
+        assert (RESULT = "1110") report "OR Test Failed" severity error;
+        assert (COUT = '0') report "Carry Out Test Failed" severity error;
+        assert (FLAG = "0000") report "Flag Test Failed" severity error;
+
+        -- Test 5: XOR operation
+        A <= "1010";  -- 10
+        B <= "1100";  -- 12
+        MODE1 <= "100";  -- XOR
+        CIN <= '0';  -- No carry-in
+        wait for 10 ns;
+        assert (RESULT = "0110") report "XOR Test Failed" severity error;
+        assert (COUT = '0') report "Carry Out Test Failed" severity error;
+        assert (FLAG = "0000") report "Flag Test Failed" severity error;
+
+        -- Test 6: XNOR operation
+        A <= "1010";  -- 10
+        B <= "1100";  -- 12
+        MODE1 <= "101";  -- XNOR
+        CIN <= '0';  -- No carry-in
+        wait for 10 ns;
+        assert (RESULT = "1001") report "XNOR Test Failed" severity error;
+        assert (COUT = '0') report "Carry Out Test Failed" severity error;
+        assert (FLAG = "0000") report "Flag Test Failed" severity error;
+
+        -- Test 7: Pass A operation
+        A <= "1010";  -- 10
+        B <= "1100";  -- 12
+        MODE1 <= "111";  -- Pass A
+        CIN <= '0';  -- No carry-in
+        wait for 10 ns;
+        assert (RESULT = "1010") report "Pass A Test Failed" severity error;
+        assert (COUT = '0') report "Carry Out Test Failed" severity error;
+        assert (FLAG = "0000") report "Flag Test Failed" severity error;
+
+        -- Test 8: Zero result check (Addition)
+        A <= "1111";  -- 15
+        B <= "1111";  -- 15
+        MODE1 <= "000";  -- ADDITION
+        CIN <= '1';  -- Carry-in
+        wait for 10 ns;
+        assert (RESULT = "1111") report "Zero Result Test Failed" severity error;
+        assert (COUT = '1') report "Carry Out Test Failed" severity error;
+        assert (FLAG = "0001") report "Zero Flag Test Failed" severity error;
+
+        -- Finish simulation
+        wait;
+    end process;
+end behavior;
